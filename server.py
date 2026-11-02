@@ -7,10 +7,10 @@ from time import monotonic
 class Metrics:
     def __init__(self):
         self.started = monotonic()
-        self.calls = {'/health': 0, '/metrics': 0, '/other': 0}
+        self.calls = {'/health': 0, '/ready': 0, '/metrics': 0, '/other': 0}
         self.lock = Lock()
     def observe(self, path: str) -> None:
-        key = path if path in {'/health','/metrics'} else '/other'
+        key = path if path in {'/health','/ready','/metrics'} else '/other'
         with self.lock:
             self.calls[key] += 1
     def render(self) -> str:
@@ -27,11 +27,15 @@ class Metrics:
 def new_server(host='127.0.0.1', port=9091):
     metrics = Metrics()
     class Handler(BaseHTTPRequestHandler):
-        def do_GET(self):
+        def respond(self, include_body):
             path = self.path.split('?',1)[0]
             metrics.observe(path)
             if path == '/health':
                 body = b'{"status":"ok"}'
+                content_type = 'application/json'
+                status = 200
+            elif path == '/ready':
+                body = b'{"status":"ready"}'
                 content_type = 'application/json'
                 status = 200
             elif path == '/metrics':
@@ -46,7 +50,12 @@ def new_server(host='127.0.0.1', port=9091):
             self.send_header('Content-Type',content_type)
             self.send_header('Content-Length',str(len(body)))
             self.end_headers()
-            self.wfile.write(body)
+            if include_body:
+                self.wfile.write(body)
+        def do_GET(self):
+            self.respond(include_body=True)
+        def do_HEAD(self):
+            self.respond(include_body=False)
         def log_message(self, format, *args):
             pass  # Avoid logging potentially sensitive paths by default.
     return ThreadingHTTPServer((host,port),Handler)
