@@ -1,0 +1,7 @@
+{
+  "name": "observability-platform",
+  "title": "Observability Platform",
+  "stage": "MVP inicial",
+  "owner": "juniordev830",
+  "publishing_requires_authentication": true
+}
