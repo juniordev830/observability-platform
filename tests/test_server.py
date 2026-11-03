@@ -10,7 +10,10 @@ class MetricsServerTests(unittest.TestCase):
         thread.start()
         try:
             url = f'http://127.0.0.1:{srv.server_port}'
-            self.assertIn(b'"ok"', urlopen(url+'/health').read())
+            with urlopen(url+'/health') as health:
+                self.assertIn(b'"ok"', health.read())
+                self.assertEqual(health.headers['Cache-Control'], 'no-store')
+                self.assertEqual(health.headers['X-Content-Type-Options'], 'nosniff')
             text = urlopen(url+'/metrics').read().decode()
             self.assertIn('demo_requests_total{path="/health"} 1', text)
             self.assertIn('demo_uptime_seconds', text)
