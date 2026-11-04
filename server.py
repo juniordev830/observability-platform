@@ -8,18 +8,27 @@ class Metrics:
     def __init__(self):
         self.started = monotonic()
         self.calls = {'/health': 0, '/ready': 0, '/metrics': 0, '/other': 0}
+        self.responses = {200: 0, 404: 0}
         self.lock = Lock()
-    def observe(self, path: str) -> None:
+    def observe(self, path: str, status: int) -> None:
         key = path if path in {'/health','/ready','/metrics'} else '/other'
+        if status not in self.responses:
+            raise ValueError('unsupported demo response status')
         with self.lock:
             self.calls[key] += 1
+            self.responses[status] += 1
     def render(self) -> str:
         with self.lock:
             calls = dict(self.calls)
+            responses = dict(self.responses)
         lines = ['# HELP demo_requests_total HTTP requests served',
                  '# TYPE demo_requests_total counter']
         for path, count in sorted(calls.items()):
             lines.append(f'demo_requests_total{{path="{path}"}} {count}')
+        lines += ['# HELP demo_responses_total HTTP responses served by status',
+                  '# TYPE demo_responses_total counter']
+        for status, count in sorted(responses.items()):
+            lines.append(f'demo_responses_total{{status="{status}"}} {count}')
         lines += ['# HELP demo_uptime_seconds Time since process started',
                   '# TYPE demo_uptime_seconds gauge',f'demo_uptime_seconds {monotonic()-self.started:.3f}']
         return '\n'.join(lines) + '\n'
@@ -29,7 +38,6 @@ def new_server(host='127.0.0.1', port=9091):
     class Handler(BaseHTTPRequestHandler):
         def respond(self, include_body):
             path = self.path.split('?',1)[0]
-            metrics.observe(path)
             if path == '/health':
                 body = b'{"status":"ok"}'
                 content_type = 'application/json'
@@ -46,6 +54,7 @@ def new_server(host='127.0.0.1', port=9091):
                 body = b'Not found'
                 content_type = 'text/plain'
                 status = 404
+            metrics.observe(path, status)
             self.send_response(status)
             self.send_header('Content-Type',content_type)
             self.send_header('Content-Length',str(len(body)))
