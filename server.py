@@ -38,6 +38,8 @@ def new_server(host='127.0.0.1', port=9091):
     class Handler(BaseHTTPRequestHandler):
         def respond(self, include_body):
             path = self.path.split('?',1)[0]
+            # Include this scrape request in the snapshot it returns.
+            metrics.observe(path, 200 if path in {'/health', '/ready', '/metrics'} else 404)
             if path == '/health':
                 body = b'{"status":"ok"}'
                 content_type = 'application/json'
@@ -54,7 +56,6 @@ def new_server(host='127.0.0.1', port=9091):
                 body = b'Not found'
                 content_type = 'text/plain'
                 status = 404
-            metrics.observe(path, status)
             self.send_response(status)
             self.send_header('Content-Type',content_type)
             self.send_header('Content-Length',str(len(body)))
