@@ -362,10 +362,12 @@ class EventLog:
             return event
 
     def list(self, *, category: str | None = None, after: int = 0,
-             limit: int = 100) -> list[dict]:
+             limit: int | None = None) -> list[dict]:
         if not isinstance(after, int) or after < 0:
             raise ValueError("after must be nonnegative")
-        if not isinstance(limit, int) or not 1 <= limit <= self.capacity:
+        if limit is None:
+            limit = min(100, self.capacity)
+        if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= self.capacity:
             raise ValueError("invalid event limit")
         with self._lock:
             result = [event.to_dict() for event in self._events
