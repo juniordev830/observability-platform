@@ -81,6 +81,8 @@ class DiagnosticsHttpTests(unittest.TestCase):
             self.assertEqual(response.status, 200)
             self.assertEqual(data["status"], "healthy")
             self.assertFalse(data["checks"][0]["healthy"])
+            self.assertEqual(data["summary"]["failed_optional"], 1)
+            self.assertEqual(data["summary"]["failed_required"], 0)
 
     def test_failed_required_dependency_changes_readiness(self):
         health = HealthRegistry()
