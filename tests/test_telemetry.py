@@ -321,7 +321,7 @@ class EventLogTests(unittest.TestCase):
         self.events.append("job", "One")
         self.events.append("job", "Two")
         self.events.append("job", "Three")
-        self.assertEqual([item["message"] for item in self.events.list(limit=2)], ["Two", "Three"])
+        self.assertEqual([item["message"] for item in self.events.list(limit=2)], ["One", "Two"])
 
     def test_attributes_are_copied(self):
         attributes = {"environment": "test"}
@@ -374,3 +374,4 @@ class EventLogTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

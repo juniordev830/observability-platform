@@ -363,11 +363,12 @@ class EventLog:
             event = Event(self._sequence, float(self.clock()), category,
                           message.strip(), dict(attributes))
             self._events.append(event)
-            return event
+            return Event(event.sequence, event.timestamp, event.category,
+                         event.message, dict(event.attributes))
 
     def list(self, *, category: str | None = None, after: int = 0,
              limit: int | None = None) -> list[dict]:
-        if not isinstance(after, int) or after < 0:
+        if not isinstance(after, int) or isinstance(after, bool) or after < 0:
             raise ValueError("after must be nonnegative")
         if limit is None:
             limit = min(100, self.capacity)
@@ -376,7 +377,7 @@ class EventLog:
         with self._lock:
             result = [event.to_dict() for event in self._events
                       if event.sequence > after and (category is None or event.category == category)]
-            return result[-limit:]
+            return result[:limit]
 
     def count(self) -> int:
         with self._lock:
@@ -385,3 +386,4 @@ class EventLog:
     def clear(self) -> None:
         with self._lock:
             self._events.clear()
+

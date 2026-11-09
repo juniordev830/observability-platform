@@ -32,7 +32,10 @@ Para testes automatizados, a porta 0 escolhe uma porta local livre.
 | GET/HEAD /events | 200, JSON | Eventos auditáveis com paginação |
 
 A rota /events aceita category, after (cursor de sequência) e limit (1 a 500).
-Parâmetros inválidos retornam 400. Rotas desconhecidas retornam 404.
+Os eventos são retornados em ordem crescente de sequência, começando pelos mais
+antigos ainda retidos. Para a próxima página, use a última sequência recebida como
+`after`. A retenção pode remover eventos anteriores ao cursor; não há garantia de
+entrega após a remoção. Parâmetros inválidos retornam 400. Rotas desconhecidas retornam 404.
 As respostas têm Cache-Control: no-store e X-Content-Type-Options: nosniff.
 O método HEAD devolve os mesmos cabeçalhos, sem corpo.
 
@@ -169,3 +172,4 @@ Projeto mantido em https://github.com/juniordev830.
 ## Resumo das verificações de saúde
 
 `GET /health/details` inclui agora a chave `summary` com `total`, `required`, `optional`, `failed_required` e `failed_optional`. Isso permite distinguir dependências opcionais degradadas de falhas que derrubam a prontidão do serviço. A decisão de `status` e os endpoints anteriores permanecem iguais. Os testes abrangem resposta HTTP, falhas mistas e registro vazio.
+
