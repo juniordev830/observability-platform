@@ -165,3 +165,7 @@ máquina de estados de alertas e ciclo de vida de incidentes.
   OpenTelemetry, Prometheus, Grafana e um armazenamento durável.
 
 Projeto mantido em https://github.com/juniordev830.
+
+## Resumo das verificações de saúde
+
+`GET /health/details` inclui agora a chave `summary` com `total`, `required`, `optional`, `failed_required` e `failed_optional`. Isso permite distinguir dependências opcionais degradadas de falhas que derrubam a prontidão do serviço. A decisão de `status` e os endpoints anteriores permanecem iguais. Os testes abrangem resposta HTTP, falhas mistas e registro vazio.
