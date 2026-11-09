@@ -37,7 +37,10 @@ def escape_label(value: str) -> str:
 def _number(value: float | int, *, nonnegative: bool = False) -> float:
     if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise MetricError("observations must be numeric")
-    result = float(value)
+    try:
+        result = float(value)
+    except OverflowError as exc:
+        raise MetricError("observations must fit a finite float") from exc
     if not isfinite(result):
         raise MetricError("observations must be finite")
     if nonnegative and result < 0:
@@ -151,7 +154,7 @@ class MetricRegistry:
             definition, key = self._key(name, labels)
             if definition.kind != "counter":
                 raise MetricError("increment requires a counter")
-            self._values[key] = self._series(key, definition) + amount
+            self._values[key] = _number(self._series(key, definition) + amount)
 
     def set_gauge(self, name: str, value: float, labels: Mapping[str, str] | None = None) -> None:
         value = _number(value)
@@ -168,7 +171,7 @@ class MetricRegistry:
             definition, key = self._key(name, labels)
             if definition.kind != "gauge":
                 raise MetricError("adjust_gauge requires a gauge")
-            self._values[key] = self._series(key, definition) + delta
+            self._values[key] = _number(self._series(key, definition) + delta)
 
     def observe(self, name: str, value: float, labels: Mapping[str, str] | None = None) -> None:
         value = _number(value)
@@ -177,8 +180,9 @@ class MetricRegistry:
             if definition.kind != "histogram":
                 raise MetricError("observe requires a histogram")
             data = self._series(key, definition)
+            new_sum = _number(data["sum"] + value)
             data["count"] += 1
-            data["sum"] += value
+            data["sum"] = new_sum
             for index, bound in enumerate(definition.buckets):
                 if value <= bound:
                     data["buckets"][index] += 1

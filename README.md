@@ -57,6 +57,9 @@ O registro exige nomes Prometheus válidos, conjuntos de labels exatos e valores
 finitos. Séries têm limite configurável para impedir crescimento ilimitado.
 Histogramas geram buckets cumulativos, soma e contagem. Operações são protegidas
 por RLock; snapshots são cópias independentes.
+Acúmulos que excedam a faixa de números finitos são rejeitados com `MetricError`
+antes de alterar o valor anterior. Em histogramas, a rejeição também preserva
+a contagem e os buckets; inteiros grandes demais recebem o mesmo erro de domínio.
 
 ## Janelas temporais e eventos
 
