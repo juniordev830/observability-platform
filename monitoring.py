@@ -32,8 +32,20 @@ class HealthReport:
     checks: tuple[CheckResult, ...]
 
     def to_dict(self) -> dict:
-        return {"status": "healthy" if self.healthy else "unhealthy",
-                "checks": [check.to_dict() for check in self.checks]}
+        required = sum(check.required for check in self.checks)
+        failed_required = sum(check.required and not check.healthy for check in self.checks)
+        failed_optional = sum(not check.required and not check.healthy for check in self.checks)
+        return {
+            "status": "healthy" if self.healthy else "unhealthy",
+            "checks": [check.to_dict() for check in self.checks],
+            "summary": {
+                "total": len(self.checks),
+                "required": required,
+                "optional": len(self.checks) - required,
+                "failed_required": failed_required,
+                "failed_optional": failed_optional,
+            },
+        }
 
 
 class HealthRegistry:
