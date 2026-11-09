@@ -96,6 +96,23 @@ class HealthRegistryTests(unittest.TestCase):
         self.health.register("db", lambda: True)
         self.assertEqual(json.loads(json.dumps(self.health.evaluate().to_dict()))["status"], "healthy")
 
+    def test_health_summary_distinguishes_optional_and_required_failures(self):
+        self.health.register("database", lambda: False)
+        self.health.register("cache", lambda: False, required=False)
+        self.health.register("search", lambda: True)
+        report = self.health.evaluate()
+        self.assertFalse(report.healthy)
+        self.assertEqual(report.to_dict()["summary"], {
+            "total": 3, "required": 2, "optional": 1,
+            "failed_required": 1, "failed_optional": 1,
+        })
+
+    def test_empty_health_summary_has_zero_counts(self):
+        self.assertEqual(self.health.evaluate().to_dict()["summary"], {
+            "total": 0, "required": 0, "optional": 0,
+            "failed_required": 0, "failed_optional": 0,
+        })
+
 
 class SLOTrackerTests(unittest.TestCase):
     def setUp(self):
