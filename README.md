@@ -32,3 +32,7 @@ Adicionar Docker Compose com Prometheus e Grafana, OpenTelemetry e alertas.
 
 ---
 Projeto de Engenharia de Software mantido na conta [juniordev830](https://github.com/juniordev830).
+
+## Verificação antes de contribuir
+
+O [guia de validação](docs/GUIA_DE_VALIDACAO.md) descreve o estado do código, as verificações reproduzíveis e os riscos a observar ao revisar novas alterações.
