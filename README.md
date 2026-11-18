@@ -4,6 +4,8 @@ Serviço local com métricas Prometheus (contador HTTP e tempo ativo). Endpoints
 
 O endpoint `GET /ready` informa que este processo demonstrativo está pronto para receber requisições. As rotas também aceitam `HEAD`, que retorna os cabeçalhos sem o corpo da resposta. O contador de métricas inclui as chamadas de `GET` e `HEAD` a `/ready`.
 
+`demo_responses_total` separa as respostas pelo código HTTP. Isso permite acompanhar as respostas 404 junto ao total de requisições, sem incluir os caminhos desconhecidos como rótulos.
+
 ## Estado
 
 **MVP funcional / projeto inicial de portfólio.** Implementa o núcleo descrito abaixo, mas não é produto pronto para produção.
