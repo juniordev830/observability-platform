@@ -26,6 +26,12 @@ class ReadinessTests(unittest.TestCase):
                 urlopen(Request(base + '/unknown', method='HEAD'))
             self.assertEqual(failure.exception.code, 404)
             self.assertEqual(failure.exception.read(), b'')
+            failure.exception.close()
+            with urlopen(base + '/metrics') as response:
+                metrics = response.read().decode()
+            self.assertIn('demo_responses_total{status="200"} 4', metrics)
+            self.assertIn('demo_responses_total{status="404"} 1', metrics)
+            self.assertIn('demo_requests_total{path="/other"} 1', metrics)
         finally:
             server.shutdown()
             server.server_close()
