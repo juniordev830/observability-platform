@@ -38,3 +38,15 @@ Projeto de Engenharia de Software mantido na conta [juniordev830](https://github
 ## Verificação antes de contribuir
 
 O [guia de validação](docs/GUIA_DE_VALIDACAO.md) descreve o estado do código, as verificações reproduzíveis e os riscos a observar ao revisar novas alterações.
+
+## Resumo de respostas HTTP
+
+Com o servidor local em execução, salve uma coleta e leia a distribuição por
+classe de status. O relatório AWK mostra a quantidade e o percentual sobre as
+respostas acumuladas desde o início do processo, incluindo a coleta em
+`/metrics`. Uma coleta com todos os contadores zerados exibe 0,00% em cada classe.
+
+```sh
+curl -fsS http://127.0.0.1:9091/metrics -o coleta.prom
+LC_ALL=C awk -f tools/resumo-http.awk coleta.prom
+```
