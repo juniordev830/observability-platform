@@ -24,8 +24,10 @@ class Metrics:
         self.responses = {200: 0, 404: 0}
         self.lock = Lock()
 
-    def observe(self, path: str, status: int) -> None:
+    def observe(self, path: str, status: int | None = None) -> None:
         key = path if path in {"/health", "/ready", "/metrics"} else "/other"
+        if status is None:
+            status = 404 if key == "/other" else 200
         with self.lock:
             self.calls[key] += 1
             self.responses[status] = self.responses.get(status, 0) + 1
