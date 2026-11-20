@@ -17,6 +17,7 @@ class MetricsServerTests(unittest.TestCase):
             text = urlopen(url+'/metrics').read().decode()
             self.assertIn('demo_requests_total{path="/health"} 1', text)
             self.assertIn('demo_uptime_seconds', text)
+            self.assertIn('demo_responses_total{status="200"} 2', text)
         finally:
             srv.shutdown(); srv.server_close(); thread.join(timeout=3)
 if __name__ == '__main__': unittest.main()
