@@ -188,3 +188,5 @@ respostas acumuladas desde o início do processo, incluindo a coleta em
 curl -fsS http://127.0.0.1:9091/metrics -o coleta.prom
 LC_ALL=C awk -f tools/resumo-http.awk coleta.prom
 ```
+
+Os nomes de verificações de saúde rejeitam caracteres de controle e entradas somente com espaços, evitando linhas falsificadas em relatórios. O gerenciador de alertas limita a retenção a 10.000 transições e cada consulta a 1.000 eventos; offsets e limites booleanos ou fracionários são rejeitados.
