@@ -85,6 +85,14 @@ class HealthRegistryTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.health.register("db", None)
 
+    def test_control_characters_and_blank_check_names_are_invalid(self):
+        for name in ("   ", "bad\nname", "bad\tname", "a" * 81):
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                self.health.register(name, lambda: True)
+        self.assertEqual(self.health.names(), [])
+        self.health.register("Serviço legítimo", lambda: True)
+        self.assertTrue(self.health.evaluate().healthy)
+
     def test_duration_is_nonnegative(self):
         def check():
             self.clock.advance(0.25)
