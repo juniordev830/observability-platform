@@ -85,6 +85,14 @@ class HealthRegistryTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.health.register("db", None)
 
+    def test_control_characters_and_blank_check_names_are_invalid(self):
+        for name in ("   ", "bad\nname", "bad\tname", "a" * 81):
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                self.health.register(name, lambda: True)
+        self.assertEqual(self.health.names(), [])
+        self.health.register("Serviço legítimo", lambda: True)
+        self.assertTrue(self.health.evaluate().healthy)
+
     def test_duration_is_nonnegative(self):
         def check():
             self.clock.advance(0.25)
@@ -311,6 +319,18 @@ class AlertManagerTests(unittest.TestCase):
         self.clock.advance(10)
         self.alerts.evaluate("high_latency", 0.8)
         self.assertEqual(len(self.alerts.history(after=1)), 1)
+
+    def test_history_bounded_cursor_and_retention(self):
+        for value in (True, False, -1, 1.2):
+            with self.subTest(after=value), self.assertRaises(ValueError):
+                self.alerts.history(after=value)
+        for limit in (False, 0, 1001, 1.5):
+            with self.subTest(limit=limit), self.assertRaises(ValueError):
+                self.alerts.history(limit=limit)
+        for cap in (True, 0, 10001):
+            with self.subTest(cap=cap), self.assertRaises(ValueError):
+                AlertManager(history_limit=cap)
+        self.assertEqual(AlertManager(history_limit=10_000).history(), [])
 
     def test_evaluate_all(self):
         self.alerts.register(AlertRule("errors", 0))
