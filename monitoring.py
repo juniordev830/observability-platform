@@ -238,8 +238,8 @@ class AlertManager:
 
     def __init__(self, clock: Callable[[], float] = monotonic,
                  history_limit: int = 500):
-        if not isinstance(history_limit, int) or history_limit < 1:
-            raise ValueError("history_limit must be positive")
+        if type(history_limit) is not int or not 1 <= history_limit <= 10_000:
+            raise ValueError("history_limit must be between 1 and 10000")
         self.clock = clock
         self._rules: dict[str, AlertRule] = {}
         self._states: dict[str, _AlertRuntime] = {}
@@ -326,10 +326,10 @@ class AlertManager:
                 (include_silenced or not details["silenced"])}
 
     def history(self, after: int = 0, limit: int = 100) -> list[dict]:
-        if not isinstance(after, int) or after < 0:
-            raise ValueError("after must be nonnegative")
-        if not isinstance(limit, int) or limit < 1:
-            raise ValueError("limit must be positive")
+        if type(after) is not int or after < 0:
+            raise ValueError("after must be a nonnegative integer")
+        if type(limit) is not int or not 1 <= limit <= 1000:
+            raise ValueError("limit must be between 1 and 1000")
         with self._lock:
             return [item.to_dict() for item in self._history if item.sequence > after][-limit:]
 
