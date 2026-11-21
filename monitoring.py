@@ -57,7 +57,8 @@ class HealthRegistry:
         self._lock = RLock()
 
     def register(self, name: str, check: Callable, *, required: bool = True) -> None:
-        if not isinstance(name, str) or not name or len(name) > 80:
+        if (not isinstance(name, str) or not name.strip() or len(name) > 80
+                or any(ord(char) < 32 or ord(char) == 127 for char in name)):
             raise ValueError("invalid health check name")
         if not callable(check):
             raise TypeError("health check must be callable")
