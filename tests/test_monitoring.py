@@ -320,6 +320,18 @@ class AlertManagerTests(unittest.TestCase):
         self.alerts.evaluate("high_latency", 0.8)
         self.assertEqual(len(self.alerts.history(after=1)), 1)
 
+    def test_history_bounded_cursor_and_retention(self):
+        for value in (True, False, -1, 1.2):
+            with self.subTest(after=value), self.assertRaises(ValueError):
+                self.alerts.history(after=value)
+        for limit in (False, 0, 1001, 1.5):
+            with self.subTest(limit=limit), self.assertRaises(ValueError):
+                self.alerts.history(limit=limit)
+        for cap in (True, 0, 10001):
+            with self.subTest(cap=cap), self.assertRaises(ValueError):
+                AlertManager(history_limit=cap)
+        self.assertEqual(AlertManager(history_limit=10_000).history(), [])
+
     def test_evaluate_all(self):
         self.alerts.register(AlertRule("errors", 0))
         result = self.alerts.evaluate_all({"errors": 2, "high_latency": 0.1})
