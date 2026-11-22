@@ -188,7 +188,7 @@ class AlertRule:
             raise ValueError("threshold must be numeric")
         if not isfinite(self.threshold):
             raise ValueError("threshold must be finite")
-        if not isinstance(self.for_seconds, (int, float)) or not isfinite(self.for_seconds):
+        if isinstance(self.for_seconds, bool) or not isinstance(self.for_seconds, (int, float)) or not isfinite(self.for_seconds):
             raise ValueError("for_seconds must be finite")
         if self.for_seconds < 0:
             raise ValueError("for_seconds cannot be negative")
@@ -356,7 +356,7 @@ class IncidentStore:
     """In-memory incident tracker with validated lifecycle transitions."""
 
     def __init__(self, clock: Callable[[], float] = time, max_incidents: int = 1000):
-        if not isinstance(max_incidents, int) or max_incidents < 1:
+        if isinstance(max_incidents, bool) or not isinstance(max_incidents, int) or max_incidents < 1:
             raise ValueError("max_incidents must be positive")
         self.clock = clock
         self.max_incidents = max_incidents
