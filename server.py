@@ -98,7 +98,10 @@ def new_server(host="127.0.0.1", port=9091, health_checks: HealthRegistry | None
             if path == "/incidents":
                 return 200, "application/json", self._json(incidents.list())
             if path == "/events":
-                parameters = parse_qs(query, keep_blank_values=True)
+                try:
+                    parameters = parse_qs(query, keep_blank_values=True, max_num_fields=3)
+                except ValueError:
+                    return 400, "application/json", self._json({"error": "invalid query"})
                 allowed = {"category", "after", "limit"}
                 if set(parameters) - allowed or any(len(values) != 1 for values in parameters.values()):
                     return 400, "application/json", self._json({"error": "invalid query"})
