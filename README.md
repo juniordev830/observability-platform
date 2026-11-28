@@ -1,5 +1,7 @@
 # Observability Platform
 
+**Navegação** · [Executar](#executar) · [Endpoints](#endpoints) · [Biblioteca de métricas](#biblioteca-de-métricas) · [Código e estudo](docs/ENGENHARIA_REVERSA.md)
+
 Serviço de observabilidade **local** em Python 3.12, sem dependências externas.
 A biblioteca mantém compatibilidade com os endpoints originais e adiciona
 métricas Prometheus, janelas deslizantes, SLOs, alertas, incidentes e diagnósticos JSON.
@@ -190,3 +192,9 @@ LC_ALL=C awk -f tools/resumo-http.awk coleta.prom
 ```
 
 Os nomes de verificações de saúde rejeitam caracteres de controle e entradas somente com espaços, evitando linhas falsificadas em relatórios. O gerenciador de alertas limita a retenção a 10.000 transições e cada consulta a 1.000 eventos; offsets e limites booleanos ou fracionários são rejeitados.
+
+## Código e roteiro de estudo
+
+Qual sinal distingue uma aplicação acessível de uma aplicação pronta para receber carga? O [guia de engenharia reversa](docs/ENGENHARIA_REVERSA.md) reúne o mapa dos módulos e uma pergunta técnica baseada no projeto.
+
+Mantido por [João Junior](https://github.com/juniordev830).
